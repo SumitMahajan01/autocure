@@ -1,0 +1,8 @@
+# Supabase Configuration
+project_id = "autocure"
+
+[functions.create-payment-session]
+verify_jwt = true
+
+[functions.stripe-webhook]
+verify_jwt = false  # Webhooks don't use JWT
