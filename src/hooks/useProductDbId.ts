@@ -12,11 +12,17 @@ export function useProductDbId(productName: string): string | null {
 
     const fetchDbId = async () => {
       try {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('products')
           .select('id')
           .eq('name', productName)
-          .single()
+          .maybeSingle()
+
+        if (error) {
+          // Silently handle error - product might not exist in DB yet
+          setDbId(null)
+          return
+        }
 
         if (data) {
           setDbId(data.id)

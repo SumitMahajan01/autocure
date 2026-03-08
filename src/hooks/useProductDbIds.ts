@@ -18,17 +18,29 @@ async function fetchAllProductIds(): Promise<Map<string, string>> {
 
   // Create new fetch promise
   fetchPromise = (async () => {
-    const { data } = await supabase.from('products').select('id, name')
+    try {
+      const { data, error } = await supabase.from('products').select('id, name')
+      
+      if (error) {
+        console.warn('Failed to fetch product IDs:', error.message)
+        cachedMap = new Map()
+        return cachedMap
+      }
 
-    const map = new Map<string, string>()
-    if (data) {
-      data.forEach((product) => {
-        map.set(product.name, product.id)
-      })
+      const map = new Map<string, string>()
+      if (data) {
+        data.forEach((product) => {
+          map.set(product.name, product.id)
+        })
+      }
+
+      cachedMap = map
+      return map
+    } catch (err) {
+      console.warn('Error fetching product IDs:', err)
+      cachedMap = new Map()
+      return cachedMap
     }
-
-    cachedMap = map
-    return map
   })()
 
   return fetchPromise
