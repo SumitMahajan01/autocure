@@ -54,19 +54,14 @@ export function ProductPage() {
 
   const dbProductId = useProductDbId(product?.name || '')
 
-  // Fetch reviews (stub implementation)
-  const fetchReviews = async (pid: string | null) => {
-    if (!pid) return
-    // Stub: In real implementation, query supabase
-    // const { data } = await supabase.from('reviews').select('*').eq('product_id', pid)...
-    setReviews([])
-  }
-
+  // Fetch reviews from product data
   useEffect(() => {
-    if (dbProductId) {
-      fetchReviews(dbProductId)
+    if (product?.review_list) {
+      setReviews(product.review_list)
+    } else {
+      setReviews([])
     }
-  }, [dbProductId])
+  }, [product])
 
   // Get related products
   const relatedProducts = useMemo(() => {
@@ -432,7 +427,12 @@ export function ProductPage() {
                 <ReviewSection
                   productId={dbProductId || ''}
                   reviews={reviews}
-                  onReviewAdded={() => fetchReviews(dbProductId)}
+                  onReviewAdded={() => {
+                    // Refresh reviews from product data
+                    if (product?.review_list) {
+                      setReviews(product.review_list)
+                    }
+                  }}
                 />
               </motion.div>
             )}

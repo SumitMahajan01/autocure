@@ -68,12 +68,6 @@ export function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!user) {
-      toast.error('Please sign in to place an order')
-      navigate('/auth')
-      return
-    }
-
     if (!validate()) {
       toast.error('Please fix the errors in the form')
       return
@@ -123,11 +117,14 @@ export function CheckoutPage() {
 
       const productMap = new Map(dbProducts?.map(p => [p.name, p.id]))
 
+      // For guest checkout, create a temporary user ID
+      const userId = user?.id || `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
       // Create order with unpaid status
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
-          user_id: user.id,
+          user_id: userId,
           total: cartTotal,
           shipping_address: { ...form },
           payment_status: 'unpaid',
@@ -250,20 +247,25 @@ export function CheckoutPage() {
           <span className="text-primary neon-text">out</span>
         </motion.h1>
 
-        {/* Not signed in banner */}
+        {/* Guest checkout banner */}
         {!user && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card p-6 text-center mb-8 max-w-2xl mx-auto"
+            className="glass-card p-6 mb-8 max-w-2xl mx-auto"
           >
-            <p className="text-muted-foreground mb-4">Please sign in to place an order</p>
-            <Link
-              to="/auth"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg neon-glow hover:brightness-110 transition-all"
-            >
-              Sign In
-            </Link>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <p className="text-foreground font-medium">Guest Checkout</p>
+                <p className="text-sm text-muted-foreground">You can place an order without creating an account</p>
+              </div>
+              <Link
+                to="/auth"
+                className="text-sm text-primary hover:text-primary/80 transition-colors whitespace-nowrap"
+              >
+                Sign in for faster checkout →
+              </Link>
+            </div>
           </motion.div>
         )}
 

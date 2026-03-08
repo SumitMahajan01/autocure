@@ -227,6 +227,35 @@ export function AuthPage() {
             </button>
           </form>
 
+          {/* Demo Login Button (login only) */}
+          {mode === 'login' && (
+            <div className="mt-6 pt-6 border-t border-glass-border/30">
+              <button
+                type="button"
+                onClick={async () => {
+                  setLoading(true)
+                  try {
+                    const { error } = await signIn('demo@autocure.com', 'demo123456')
+                    if (error) {
+                      alert('Demo account not set up yet. Please sign up first.')
+                    } else {
+                      navigate('/')
+                    }
+                  } finally {
+                    setLoading(false)
+                  }
+                }}
+                disabled={loading}
+                className="w-full py-3 bg-muted/50 border border-glass-border/30 text-foreground font-display font-medium rounded-lg hover:bg-muted transition-all disabled:opacity-50"
+              >
+                Try Demo Account
+              </button>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                No signup required - instant access
+              </p>
+            </div>
+          )}
+
           {/* Mode toggle (login + signup only) */}
           {mode !== 'reset' && (
             <div className="text-center mt-6">

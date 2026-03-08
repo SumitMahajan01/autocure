@@ -1,3 +1,12 @@
+export interface Review {
+  id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  user_id: string;
+  profiles?: { display_name: string | null } | null;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -21,6 +30,7 @@ export interface Product {
   tags?: string[];
   discount_percent?: number;
   original_price?: number | null;
+  review_list?: Review[];
 }
 
 export const products: Product[] = [
@@ -51,7 +61,33 @@ export const products: Product[] = [
     brand: "AutoCure",
     tags: ["premium", "best-seller", "ceramic"],
     discount_percent: 0,
-    original_price: null
+    original_price: null,
+    review_list: [
+      {
+        id: "r1",
+        rating: 5,
+        comment: "Absolutely incredible product! My car looks like it just came from the showroom. The hydrophobic effect is amazing - water just beads right off.",
+        created_at: "2026-02-15T00:00:00Z",
+        user_id: "user1",
+        profiles: { display_name: "Michael R." }
+      },
+      {
+        id: "r2",
+        rating: 5,
+        comment: "Worth every penny. Application was straightforward and the results are stunning. 5 months in and still going strong!",
+        created_at: "2026-01-28T00:00:00Z",
+        user_id: "user2",
+        profiles: { display_name: "Sarah K." }
+      },
+      {
+        id: "r3",
+        rating: 4,
+        comment: "Great product but make sure you prep the surface properly. Took me about 4 hours total but the results speak for themselves.",
+        created_at: "2026-01-10T00:00:00Z",
+        user_id: "user3",
+        profiles: { display_name: "David L." }
+      }
+    ]
   },
   {
     id: "2",
