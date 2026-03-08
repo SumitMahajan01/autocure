@@ -69,30 +69,98 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const signUp = async (email: string, password: string, displayName?: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          display_name: displayName,
+  const signUp = async (email: string, password: string, displayName?: string): Promise<{ error: Error | null }> => {
+    try {
+      // Validate inputs
+      if (!email?.trim()) {
+        return { error: new Error('Email is required') }
+      }
+      if (!password || password.length < 6) {
+        return { error: new Error('Password must be at least 6 characters') }
+      }
+      if (!supabaseUrl || !supabaseKey) {
+        return { error: new Error('Supabase is not configured. Please check your environment variables.') }
+      }
+
+      const { error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: {
+            display_name: displayName?.trim(),
+          },
+          emailRedirectTo: window.location.origin,
         },
-        emailRedirectTo: window.location.origin,
-      },
-    })
-    return { error }
+      })
+      
+      if (error) {
+        console.error('Sign up error:', error.message)
+        return { error: new Error(getAuthErrorMessage(error.message)) }
+      }
+      
+      return { error: null }
+    } catch (err: any) {
+      console.error('Unexpected sign up error:', err)
+      return { error: new Error('An unexpected error occurred. Please try again.') }
+    }
   }
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    return { error }
+  const signIn = async (email: string, password: string): Promise<{ error: Error | null }> => {
+    try {
+      // Validate inputs
+      if (!email?.trim()) {
+        return { error: new Error('Email is required') }
+      }
+      if (!password) {
+        return { error: new Error('Password is required') }
+      }
+      if (!supabaseUrl || !supabaseKey) {
+        return { error: new Error('Supabase is not configured. Please check your environment variables.') }
+      }
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      })
+      
+      if (error) {
+        console.error('Sign in error:', error.message)
+        return { error: new Error(getAuthErrorMessage(error.message)) }
+      }
+      
+      return { error: null }
+    } catch (err: any) {
+      console.error('Unexpected sign in error:', err)
+      return { error: new Error('An unexpected error occurred. Please try again.') }
+    }
   }
 
-  const signOut = async () => {
-    await supabase.auth.signOut()
+  const signOut = async (): Promise<void> => {
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        console.error('Sign out error:', error.message)
+        throw new Error('Failed to sign out. Please try again.')
+      }
+    } catch (err: any) {
+      console.error('Unexpected sign out error:', err)
+      throw new Error('An unexpected error occurred while signing out.')
+    }
+  }
+
+  // Helper function to translate Supabase auth errors to user-friendly messages
+  const getAuthErrorMessage = (message: string): string => {
+    const errorMap: Record<string, string> = {
+      'Invalid login credentials': 'Invalid email or password. Please try again.',
+      'Email not confirmed': 'Please confirm your email address before signing in.',
+      'User already registered': 'An account with this email already exists.',
+      'Password should be at least 6 characters': 'Password must be at least 6 characters long.',
+      'Unable to validate email address: invalid format': 'Please enter a valid email address.',
+      'Rate limit exceeded': 'Too many attempts. Please wait a moment and try again.',
+      'Network error': 'Network connection failed. Please check your internet connection.',
+    }
+    
+    return errorMap[message] || message || 'An error occurred. Please try again.'
   }
 
   return (
